@@ -25,7 +25,7 @@ try:
     from moviepy.editor import VideoFileClip
 except ImportError:
     print("Fail to import moviepy. Need only for Video upload.")
-    
+
 
 # The urllib library was split into other modules from Python 2 to Python 3
 if sys.version_info.major == 3:
@@ -387,7 +387,7 @@ class InstagramAPI:
             except:
                 pass
             return False
-    
+
     def direct_message(self, text, recipients):
         if type(recipients) != type([]):
             recipients = [str(recipients)]
@@ -429,7 +429,7 @@ class InstagramAPI:
         )
         #self.SendRequest(endpoint,post=data) #overwrites 'Content-type' header and boundary is missed
         response = self.s.post(self.API_URL + endpoint, data=data)
-        
+
         if response.status_code == 200:
             self.LastResponse = response
             self.LastJson = json.loads(response.text)
@@ -443,7 +443,7 @@ class InstagramAPI:
             except:
                 pass
             return False
-        
+
     def direct_share(self, media_id, recipients, text=None):
         if not isinstance(position, list):
             recipients = [str(recipients)]
@@ -989,32 +989,30 @@ class InstagramAPI:
             return False
 
     def getTotalFollowers(self, usernameId):
-        followers = []
-        next_max_id = ''
-        while 1:
-            self.getUserFollowers(usernameId, next_max_id)
-            temp = self.LastJson
+        followers = list()
 
-            for item in temp["users"]:
-                followers.append(item)
+        # Get initial list of followers
+        self.getUserFollowers(usernameId)
+        followers.extend(self.LastJson["users"])
 
-            if temp["big_list"] is False:
-                return followers
-            next_max_id = temp["next_max_id"]
+        while "next_max_id" in self.LastJson:
+            self.getUserFollowers(usernameId, self.LastJson["next_max_id"])
+            followers.extend(self.LastJson["users"])
+
+        return followers
 
     def getTotalFollowings(self, usernameId):
-        followers = []
-        next_max_id = ''
-        while True:
-            self.getUserFollowings(usernameId, next_max_id)
-            temp = self.LastJson
+        followers = list()
 
-            for item in temp["users"]:
-                followers.append(item)
+        # Get initial list of followers
+        self.getUserFollowings(usernameId)
+        followers.extend(self.LastJson["users"])
 
-            if temp["big_list"] is False:
-                return followers
-            next_max_id = temp["next_max_id"]
+        while "next_max_id" in self.LastJson:
+            self.getUserFollowings(usernameId, self.LastJson["next_max_id"])
+            followers.extend(self.LastJson["users"])
+
+        return followers
 
     def getTotalUserFeed(self, usernameId, minTimestamp=None):
         user_feed = []
